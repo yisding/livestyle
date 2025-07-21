@@ -1,59 +1,74 @@
 # LiveStyle Project Structure
 
 ## Root Directory
+- **flutterlive/**: Main Flutter application directory
+- **designs/**: Design assets and HTML mockups
+- **.kiro/**: Kiro IDE configuration and steering files
+
+## Flutter Project Structure (flutterlive/)
 - **android/**: Android platform-specific code and configuration
-- **ios/**: iOS platform-specific code and configuration
-- **lib/**: Main Dart code for the application
+- **ios/**: iOS platform-specific code and configuration  
 - **macos/**: macOS platform-specific code and configuration
 - **web/**: Web platform-specific code and configuration
 - **windows/**: Windows platform-specific code and configuration
 - **linux/**: Linux platform-specific code and configuration
+- **lib/**: Main Dart source code
 - **test/**: Test files for the application
-- **designs/**: Design assets and mockups
 
-## Design Assets
-- **designs/code/**: HTML mockups of UI screens
+## Design Assets (designs/)
+- **designs/code/**: HTML mockups of UI screens (home, nutrition, workout, profile)
 - **designs/*.png**: Design screenshots for reference
+- Uses Tailwind CSS and Manrope font family
+- Color scheme: Primary green (#51946c), background (#f8fbfa), text (#0e1a13)
 
-## Source Code Organization
+## Source Code Organization (lib/)
 
 ### Current Structure
 ```
 lib/
 ├── firebase_options.dart  # Firebase configuration
-└── main.dart             # Application entry point
+└── main.dart             # Application entry point with Firebase initialization
 ```
 
-### Planned Structure (for implementation)
+### Recommended Structure for Implementation
 ```
 lib/
 ├── firebase_options.dart  # Firebase configuration
 ├── main.dart             # Application entry point
-├── config/               # App configuration
-├── models/               # Data models
+├── config/               # App configuration and constants
+├── models/               # Data models (user, nutrition, workout)
 ├── screens/              # UI screens
-│   ├── home/             # Home screen
-│   ├── nutrition/        # Nutrition tracking screen
-│   ├── workout/          # Workout tracking screen
-│   └── profile/          # User profile screen
+│   ├── home/             # Home screen with AI coach recommendations
+│   ├── nutrition/        # Nutrition logging and food scanning
+│   ├── workout/          # Workout tracking and history
+│   └── profile/          # User profile and settings
 ├── services/             # Business logic and services
-│   ├── ai_coaches/       # AI coach implementations
-│   ├── health_connect/   # Health data integration
-│   └── image_analysis/   # Food image analysis
-├── utils/                # Utility functions
+│   ├── ai_coaches/       # AI coach implementations (nutritionist, trainer, therapist)
+│   ├── health_connect/   # Android Health Connect integration
+│   ├── apple_health/     # Apple Health integration
+│   └── food_analysis/    # Gemini-powered food image analysis
+├── utils/                # Utility functions and helpers
 └── widgets/              # Reusable UI components
 ```
 
 ## Architecture Guidelines
 
-- Follow a clean architecture approach with separation of concerns
-- Use provider or bloc pattern for state management
-- Keep UI components separate from business logic
-- Organize code by feature when possible
-- Use dependency injection for service access
+- **Clean Architecture**: Separate UI, business logic, and data layers
+- **State Management**: Use Provider or Bloc pattern for state management
+- **Feature-Based Organization**: Group related files by feature when the app grows
+- **Material Design 3**: Follow Material Design 3 principles for UI consistency
+- **Firebase Integration**: Centralize Firebase services and AI model access
+- **Error Handling**: Implement proper error handling for AI services and health data
+- **Platform Channels**: Use platform channels for Health Connect/Apple Health integration
 
 ## Platform Support
-- Android
-- iOS
-- Web
-- macOS
+- **Primary**: Android, iOS
+- **Secondary**: Web, macOS
+- **Future**: Windows, Linux
+
+## Navigation Structure
+Bottom navigation with 4 main tabs:
+1. **Home**: User stats and AI coach recommendations
+2. **Nutrition**: Food logging with camera scanning
+3. **Workout**: Exercise tracking and history
+4. **Profile**: User settings and personal information
