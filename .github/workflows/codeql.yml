@@ -42,7 +42,7 @@ jobs:
         if: matrix.language == 'java-kotlin'
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          channel: 'stable'
 
       - name: Build Flutter Android project
         if: matrix.language == 'java-kotlin'
