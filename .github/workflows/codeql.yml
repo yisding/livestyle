@@ -38,7 +38,21 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Set up Flutter
+        if: matrix.language == 'java-kotlin'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Build Flutter Android project
+        if: matrix.language == 'java-kotlin'
+        run: |
+          cd flutterlive
+          flutter pub get
+          flutter build apk --debug
+
       - name: Autobuild
+        if: matrix.language != 'java-kotlin'
         uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
