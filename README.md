@@ -6,7 +6,7 @@ Livestyle is a Flutter application built with Material Design 3 that does intens
 
 At its core, Livestyle has three AI coaches, an expert AI nutritionist, an expert AI personal trainer, and an expert psychotherapist. Each day, 3 times a day, each of the coaches will synthesize all of the relevant data and provide advice to the user.
 
-Initailly each of the AI coaches will be built using OpenAI o3-pro with web browsing.
+Initailly each of the AI coaches will be built using Gemini 2.5 Pro with web browsing.
 
 ## Data
 
@@ -18,7 +18,7 @@ Using the food data and weight data and body fat percentage data, Livestyle will
 
 ## AI Calorie and Macro Estimation from Images
 
-Livestyle will estimate the calories and macronutrient levels of foods based on the images that the user takes using OpenAI's LLMs. These calorie and macronutrient counts will be logged and will help the coaches assess if the user has enough of a calorie deficit and is getting enough macronutrients to sustain their diet and muscle building goals.
+Livestyle will estimate the calories and macronutrient levels of foods based on the images that the user takes using Gemini 2.5 Pro. These calorie and macronutrient counts will be logged and will help the coaches assess if the user has enough of a calorie deficit and is getting enough macronutrients to sustain their diet and muscle building goals.
 
 ## Workout Optimization
 
