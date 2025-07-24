@@ -3,20 +3,36 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:mcp_toolkit/mcp_toolkit.dart';
+import 'dart:async';
 import 'config/theme.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/nutrition/nutrition_screen.dart';
 import 'screens/workout/workout_screen.dart';
 import 'screens/profile/profile_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+Future<void> main() async {
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      
+      // Initialize MCP Toolkit
+      MCPToolkitBinding.instance
+        ..initialize() // Initializes the Toolkit
+        ..initializeFlutterToolkit(); // Adds Flutter related methods to the MCP server
+      
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize Firebase AI model
-  FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
+      // Initialize Firebase AI model
+      FirebaseAI.googleAI().generativeModel(model: 'gemini-2.5-flash');
 
-  runApp(const ProviderScope(child: MyApp()));
+      runApp(const ProviderScope(child: MyApp()));
+    },
+    (error, stack) {
+      // Critical: Handle zone errors for MCP server error reporting
+      MCPToolkitBinding.instance.handleZoneError(error, stack);
+    },
+  );
 }
 
 class MyApp extends StatelessWidget {
