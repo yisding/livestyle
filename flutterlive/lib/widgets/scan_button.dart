@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/food_scanner/food_scanner_screen.dart';
 
 class ScanButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -33,12 +34,9 @@ class ScanButton extends StatelessWidget {
   }
 
   void _navigateToFoodScanner(BuildContext context) {
-    // TODO: Navigate to food scanner screen when it's implemented
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Food scanner will be available soon!'),
-        backgroundColor: Color(0xFF51946C),
-        duration: Duration(seconds: 2),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const FoodScannerScreen(),
       ),
     );
   }

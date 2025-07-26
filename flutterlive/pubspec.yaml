@@ -38,6 +38,7 @@ dependencies:
   firebase_ai: ^2.2.1
   flutter_riverpod: ^2.6.1
   mcp_toolkit: ^0.2.3
+  camera: ^0.11.0+2
 
 dev_dependencies:
   flutter_test:
