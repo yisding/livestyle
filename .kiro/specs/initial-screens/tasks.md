@@ -59,7 +59,6 @@
 
 - [x] 4. Implement Nutrition Screen
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
-    doe
 - [x] 4.1 Create NutritionSummary widget
 
   - Implement daily calorie goal and consumption display
