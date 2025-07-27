@@ -41,6 +41,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   mcp_toolkit: ^0.2.3
   camera: ^0.11.0+2
+  health: ^13.1.1
 
 dev_dependencies:
   flutter_test:
