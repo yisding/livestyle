@@ -19,7 +19,7 @@ class NutritionSummary extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -111,7 +111,7 @@ class NutritionSummary extends ConsumerWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: const Color(0xFF0E1A13).withOpacity(0.7),
+            color: const Color(0xFF0E1A13).withValues(alpha: 0.7),
           ),
         ),
       ],

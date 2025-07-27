@@ -32,7 +32,7 @@ class ConfirmationButtons extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              disabledBackgroundColor: const Color(0xFF51946c).withOpacity(0.5),
+              disabledBackgroundColor: const Color(0xFF51946c).withValues(alpha: 0.5),
             ),
             child: isLoading
                 ? const SizedBox(

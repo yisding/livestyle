@@ -62,7 +62,7 @@ class AnalysisResults extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -92,7 +92,7 @@ class AnalysisResults extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 14,
-              color: const Color(0xFF0e1a13).withOpacity(0.7),
+              color: const Color(0xFF0e1a13).withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -110,7 +110,7 @@ class AnalysisResults extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -137,7 +137,7 @@ class AnalysisResults extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getConfidenceColor().withOpacity(0.1),
+                  color: _getConfidenceColor().withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -159,7 +159,7 @@ class AnalysisResults extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF51946c).withOpacity(0.1),
+              color: const Color(0xFF51946c).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -187,7 +187,7 @@ class AnalysisResults extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 12,
-                        color: const Color(0xFF0e1a13).withOpacity(0.7),
+                        color: const Color(0xFF0e1a13).withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -235,7 +235,7 @@ class AnalysisResults extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -256,7 +256,7 @@ class AnalysisResults extends StatelessWidget {
               fontFamily: 'Manrope',
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF0e1a13).withOpacity(0.7),
+              color: const Color(0xFF0e1a13).withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -272,7 +272,7 @@ class AnalysisResults extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -303,7 +303,7 @@ class AnalysisResults extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Manrope',
               fontSize: 14,
-              color: const Color(0xFF0e1a13).withOpacity(0.7),
+              color: const Color(0xFF0e1a13).withValues(alpha: 0.7),
             ),
           ),
         ],

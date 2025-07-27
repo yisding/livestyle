@@ -74,11 +74,17 @@ class RecommendedWorkouts extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-              image: DecorationImage(
+              image: advice.imageUrl.isNotEmpty ? DecorationImage(
                 image: NetworkImage(advice.imageUrl),
                 fit: BoxFit.cover,
-              ),
+              ) : null,
+              color: advice.imageUrl.isEmpty ? const Color(0xFFE8F2EC) : null,
             ),
+            child: advice.imageUrl.isEmpty ? const Icon(
+              Icons.psychology,
+              size: 24,
+              color: Color(0xFF51946C),
+            ) : null,
           ),
           const SizedBox(width: AppTheme.spacingMd),
           Expanded(

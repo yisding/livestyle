@@ -87,11 +87,17 @@ class CoachAdviceCard extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                      image: DecorationImage(
+                      image: advice.imageUrl.isNotEmpty ? DecorationImage(
                         image: NetworkImage(advice.imageUrl),
                         fit: BoxFit.cover,
-                      ),
+                      ) : null,
+                      color: advice.imageUrl.isEmpty ? const Color(0xFFE8F2EC) : null,
                     ),
+                    child: advice.imageUrl.isEmpty ? const Icon(
+                      Icons.psychology,
+                      size: 32,
+                      color: Color(0xFF51946C),
+                    ) : null,
                   ),
                 ),
               ),

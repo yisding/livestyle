@@ -17,7 +17,7 @@ class MacronutrientBreakdown extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -78,9 +78,9 @@ class MacronutrientBreakdown extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -101,7 +101,7 @@ class MacronutrientBreakdown extends ConsumerWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF0E1A13).withOpacity(0.7),
+              color: const Color(0xFF0E1A13).withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -153,7 +153,7 @@ class MacronutrientBreakdown extends ConsumerWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF0E1A13).withOpacity(0.7),
+              color: const Color(0xFF0E1A13).withValues(alpha: 0.7),
             ),
           ),
         ),

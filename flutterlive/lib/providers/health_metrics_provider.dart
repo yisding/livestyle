@@ -2,24 +2,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/health_metric.dart';
 
 final healthMetricsProvider = Provider<List<HealthMetric>>((ref) {
-  return const [
+  return [
     HealthMetric(
       name: 'Weight',
-      value: '142 lbs',
-      change: '-2.3 lbs',
-      isPositiveChange: true,
+      value: '65.0 kg',
+      change: '-2.5 kg',
+      isPositiveChange: true, // Weight loss is positive
     ),
     HealthMetric(
       name: 'BMI',
-      value: '23.1',
-      change: '-0.4',
-      isPositiveChange: true,
+      value: '22.1',
+      change: '-0.8',
+      isPositiveChange: true, // BMI reduction is positive
     ),
     HealthMetric(
       name: 'Body Fat',
-      value: '22.5%',
+      value: '18.5%',
       change: '-1.2%',
-      isPositiveChange: true,
+      isPositiveChange: true, // Body fat reduction is positive
     ),
   ];
 });

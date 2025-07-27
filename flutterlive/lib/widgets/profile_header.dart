@@ -20,11 +20,17 @@ class ProfileHeader extends ConsumerWidget {
             height: 128,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              image: DecorationImage(
-                image: NetworkImage(user.imageUrl),
-                fit: BoxFit.cover,
-              ),
+              image: user.imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(user.imageUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+              color: user.imageUrl.isEmpty ? const Color(0xFFE8F2EC) : null,
             ),
+            child: user.imageUrl.isEmpty
+                ? const Icon(Icons.person, size: 64, color: Color(0xFF51946C))
+                : null,
           ),
           const SizedBox(width: AppTheme.spacingMd),
           // User Info
@@ -44,16 +50,16 @@ class ProfileHeader extends ConsumerWidget {
                 const SizedBox(height: AppTheme.spacingXs),
                 Text(
                   '${user.age}, ${user.height}',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.primaryColor,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryColor),
                 ),
                 const SizedBox(height: AppTheme.spacingXs),
                 Text(
                   'Goal: ${user.weightLossGoal}',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.primaryColor,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryColor),
                 ),
               ],
             ),

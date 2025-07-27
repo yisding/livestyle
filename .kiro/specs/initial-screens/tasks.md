@@ -176,24 +176,42 @@
   - Ensure responsive layout for different screen sizes
   - _Requirements: 6.1, 7.4_
 
-- [ ] 8. Integration and testing
+- [x] 8. Fix deprecation warnings and code quality issues
+
+  - _Requirements: 7.3_
+
+- [x] 8.1 Fix withOpacity deprecation warnings
+
+  - Replace all instances of .withOpacity() with .withValues(alpha: value) throughout the codebase
+  - Update widgets: analysis_results.dart, camera_view.dart, confirmation_buttons.dart, macronutrient_breakdown.dart, meal_list.dart, nutrition_summary.dart, progress_chart.dart
+  - Update food_scanner_screen.dart
+  - _Requirements: 7.3_
+
+- [x] 8.2 Fix layout and code quality issues
+
+  - Replace Container() with SizedBox() for whitespace in progress_chart.dart
+  - Ensure all code follows Flutter linting rules
+  - _Requirements: 7.3, 7.4_
+
+- [x] 9. Integration and testing
 
   - _Requirements: 2.4, 7.3, 7.4_
 
-- [ ] 8.1 Integrate all screens with navigation
+- [x] 9.1 Test navigation and state management
 
-  - Connect all screens through bottom navigation
+  - Verify all screens navigate correctly through bottom navigation
   - Ensure proper Riverpod state preservation during navigation
   - Test state management across screen transitions
   - _Requirements: 2.4_
 
-- [ ] 8.2 Test responsive layouts
+- [x] 9.2 Test responsive layouts
 
   - Verify UI components adapt to different screen sizes
   - Fix any layout issues or overflows
+  - Test on different device sizes (phone, tablet)
   - _Requirements: 7.4_
 
-- [ ] 8.3 Perform widget tests
+- [x] 9.3 Perform widget tests
   - Write tests for key UI components
   - Verify navigation and Riverpod state management
   - Test provider behavior and state updates
