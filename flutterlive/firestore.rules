@@ -1,0 +1,133 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions for validation
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidTimestamp(timestamp) {
+      return timestamp is timestamp && 
+             timestamp <= request.time + duration.value(1, 'h') && // Allow 1 hour in future for clock skew
+             timestamp >= timestamp.date(2020, 1, 1); // Reasonable past date limit
+    }
+    
+    function isValidHealthDataType(type) {
+      return type in ['weight', 'bodyFatPercentage', 'bmi', 'steps', 'heartRate', 
+                     'workout', 'calories', 'sleep', 'bloodPressure', 'bloodGlucose'];
+    }
+    
+    function isValidNumber(value) {
+      return value is number && value >= 0 && value < 10000; // Reasonable range for health metrics
+    }
+    
+    function hasRequiredHealthDataFields(data) {
+      return 'id' in data && 
+             'type' in data && 
+             'value' in data && 
+             'timestamp' in data &&
+             'createdAt' in data &&
+             'updatedAt' in data;
+    }
+    
+    function isValidHealthDataDocument(data) {
+      return hasRequiredHealthDataFields(data) &&
+             isValidHealthDataType(data.type) &&
+             isValidNumber(data.value) &&
+             isValidTimestamp(data.timestamp) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt) &&
+             data.id is string &&
+             data.id.size() > 0 &&
+             data.id.size() <= 100;
+    }
+    
+    // User document rules
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      // Health Connect data collection
+      match /healthConnectData/{dataId} {
+        allow read, write: if isOwner(userId) && 
+                             isValidHealthDataDocument(resource.data);
+        
+        allow create: if isOwner(userId) && 
+                        isValidHealthDataDocument(request.resource.data) &&
+                        request.resource.data.id == dataId;
+        
+        allow update: if isOwner(userId) && 
+                        isValidHealthDataDocument(request.resource.data) &&
+                        request.resource.data.id == resource.data.id && // ID cannot change
+                        request.resource.data.createdAt == resource.data.createdAt; // createdAt cannot change
+      }
+      
+      // Manual health data collection
+      match /manualHealthData/{dataId} {
+        allow read, write: if isOwner(userId) && 
+                             isValidHealthDataDocument(resource.data);
+        
+        allow create: if isOwner(userId) && 
+                        isValidHealthDataDocument(request.resource.data) &&
+                        request.resource.data.id == dataId;
+        
+        allow update: if isOwner(userId) && 
+                        isValidHealthDataDocument(request.resource.data) &&
+                        request.resource.data.id == resource.data.id && // ID cannot change
+                        request.resource.data.createdAt == resource.data.createdAt; // createdAt cannot change
+      }
+      
+      // Data source preferences
+      match /preferences/dataSourcePreferences {
+        allow read, write: if isOwner(userId);
+        
+        allow create, update: if isOwner(userId) && 
+                                'updatedAt' in request.resource.data &&
+                                isValidTimestamp(request.resource.data.updatedAt);
+      }
+      
+      // Health Connect sync status
+      match /syncStatus/healthConnect {
+        allow read, write: if isOwner(userId);
+        
+        allow create, update: if isOwner(userId) && 
+                                'updatedAt' in request.resource.data &&
+                                isValidTimestamp(request.resource.data.updatedAt) &&
+                                'isAvailable' in request.resource.data &&
+                                request.resource.data.isAvailable is bool &&
+                                'syncInProgress' in request.resource.data &&
+                                request.resource.data.syncInProgress is bool;
+      }
+      
+      // Workout sessions (extended health data)
+      match /workoutSessions/{sessionId} {
+        allow read, write: if isOwner(userId);
+        
+        allow create: if isOwner(userId) && 
+                        'id' in request.resource.data &&
+                        'startTime' in request.resource.data &&
+                        'endTime' in request.resource.data &&
+                        'workoutType' in request.resource.data &&
+                        'source' in request.resource.data &&
+                        isValidTimestamp(request.resource.data.startTime) &&
+                        isValidTimestamp(request.resource.data.endTime) &&
+                        request.resource.data.startTime < request.resource.data.endTime &&
+                        request.resource.data.source in ['healthConnect', 'manual'] &&
+                        request.resource.data.id == sessionId;
+        
+        allow update: if isOwner(userId) && 
+                        request.resource.data.id == resource.data.id &&
+                        request.resource.data.source == resource.data.source; // Source cannot change
+      }
+    }
+    
+    // Global rules - deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
