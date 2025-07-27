@@ -9,11 +9,14 @@
 - **flutter**: Core Flutter framework
 - **cupertino_icons**: ^1.0.8 - iOS style icons
 - **firebase_core**: ^3.15.1 - Firebase integration
-- **firebase_ai**: ^2.2.1 - Firebase AI services (Gemini 2.5 Pro)
+- **firebase_ai**: ^2.2.1 - Firebase AI services (Gemini 2.5 Flash)
+- **flutter_riverpod**: ^2.6.1 - State management
+- **mcp_toolkit**: ^0.2.3 - Model Context Protocol for debugging
+- **camera**: ^0.11.0+2 - Camera functionality for food scanning
 - **flutter_lints**: ^5.0.0 - Linting rules for code quality
 
 ## AI Integration
-- **Gemini 2.5 Pro**: Primary AI model for coaches and food analysis
+- **Gemini 2.5 Flash**: Primary AI model for coaches and food analysis
 - **Firebase AI**: Used for generative AI capabilities
 - Three AI coaches: nutritionist, personal trainer, psychotherapist
 
@@ -53,6 +56,9 @@ flutter test
 
 # Run specific test file
 flutter test test/widget_test.dart
+
+# Run tests with coverage
+flutter test --coverage
 ```
 
 ### Building
@@ -73,10 +79,20 @@ flutter build web
 flutter build macos
 ```
 
+### Analysis & Linting
+```bash
+# Analyze code for issues
+flutter analyze
+
+# Format code
+dart format .
+```
+
 ## Firebase Configuration
 - Firebase configuration files included for all platforms (Android, iOS, macOS, Web)
 - Firebase initialized in main.dart with DefaultFirebaseOptions
 - Google Services configuration files present for each platform
+- Project ID: nomadlander-livestyle
 
 ## Code Style & Standards
 - Follow Flutter linting rules defined in analysis_options.yaml
@@ -84,3 +100,5 @@ flutter build macos
 - Follow Material Design 3 guidelines for UI components
 - Use Manrope font family for consistent typography
 - Implement proper error handling for AI service calls
+- Use Riverpod for state management
+- MCP toolkit integration for enhanced debugging capabilities
