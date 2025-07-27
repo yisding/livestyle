@@ -5,7 +5,7 @@ class NutritionData {
   final int carbGrams;
   final int fatGrams;
   final List<Meal> meals;
-  
+
   // Additional properties for nutrition summary
   final int calorieGoal;
   final int caloriesConsumed;
