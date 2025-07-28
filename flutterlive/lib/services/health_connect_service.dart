@@ -3,18 +3,44 @@ import 'dart:io';
 import 'package:health/health.dart';
 import '../models/health_data_point.dart' as app_models;
 
+/// Custom exceptions for Health Connect operations
+class HealthConnectException implements Exception {
+  final String message;
+  final String? code;
+
+  const HealthConnectException(this.message, [this.code]);
+
+  @override
+  String toString() =>
+      'HealthConnectException: $message${code != null ? ' (Code: $code)' : ''}';
+}
+
+class PermissionException extends HealthConnectException {
+  const PermissionException(String message)
+    : super(message, 'PERMISSION_DENIED');
+}
+
+class NetworkException extends HealthConnectException {
+  const NetworkException(String message) : super(message, 'NETWORK_ERROR');
+}
+
+class PlatformException extends HealthConnectException {
+  const PlatformException(String message)
+    : super(message, 'PLATFORM_NOT_SUPPORTED');
+}
+
 /// Events emitted by Health Connect service
 abstract class HealthConnectEvent {}
 
 class HealthDataChangedEvent extends HealthConnectEvent {
   final List<app_models.HealthDataType> changedTypes;
-  
+
   HealthDataChangedEvent(this.changedTypes);
 }
 
 class PermissionChangedEvent extends HealthConnectEvent {
   final Map<app_models.HealthDataType, bool> permissions;
-  
+
   PermissionChangedEvent(this.permissions);
 }
 
@@ -22,154 +48,224 @@ class PermissionChangedEvent extends HealthConnectEvent {
 abstract class HealthConnectService {
   /// Check if Health Connect is available on the current platform
   Future<bool> isAvailable();
-  
+
   /// Check if permissions are granted for the specified data types
   Future<bool> hasPermissions(List<app_models.HealthDataType> types);
-  
+
   /// Request permissions for the specified data types
   Future<bool> requestPermissions(List<app_models.HealthDataType> types);
-  
+
   /// Get health data for the specified types and time range
   Future<List<app_models.HealthDataPoint>> getHealthData(
     List<app_models.HealthDataType> types,
     DateTime startTime,
     DateTime endTime,
   );
-  
+
   /// Write health data points to Health Connect (read-only implementation returns false)
   Future<bool> writeHealthData(List<app_models.HealthDataPoint> dataPoints);
-  
+
   /// Revoke all Health Connect permissions
   Future<void> revokePermissions();
-  
+
   /// Stream of Health Connect events
   Stream<HealthConnectEvent> get healthConnectEvents;
-  
+
   /// Check if the current platform supports Health Connect
   bool get isPlatformSupported;
-  
-  /// Singleton instance
-  static HealthConnectService? _instance;
-  
-  /// Get the singleton instance
-  static HealthConnectService get instance {
-    _instance ??= _createPlatformService();
-    return _instance!;
-  }
-  
-  /// Factory method to create platform-specific service
-  static HealthConnectService _createPlatformService() {
-    if (Platform.isAndroid) {
-      return HealthConnectServiceImpl();
-    } else {
-      return HealthConnectServiceStub();
-    }
-  }
+
+  /// Get individual permission status for each data type
+  Future<Map<app_models.HealthDataType, bool>> getPermissionStatus(
+    List<app_models.HealthDataType> types,
+  );
+
+  /// Dispose of resources and close streams
+  void dispose();
 }
 
 /// Android implementation using the health package
 class HealthConnectServiceImpl implements HealthConnectService {
   final Health _health = Health();
-  final StreamController<HealthConnectEvent> _eventController = 
+  final StreamController<HealthConnectEvent> _eventController =
       StreamController<HealthConnectEvent>.broadcast();
-  
+
   @override
   bool get isPlatformSupported => Platform.isAndroid;
-  
+
   @override
   Future<bool> isAvailable() async {
     if (!isPlatformSupported) return false;
-    
+
     try {
-      // Check if Health Connect is installed and available
-      return _health.isDataTypeAvailable(HealthDataType.STEPS);
+      // Check if Health Connect is installed and available on Android
+      // First check if the health package can access basic data types
+      final isStepsAvailable = _health.isDataTypeAvailable(
+        HealthDataType.STEPS,
+      );
+
+      if (!isStepsAvailable) {
+        return false;
+      }
+
+      // Additional check to ensure Health Connect is properly configured
+      // Try to check permissions for a basic data type
+      final hasBasicAccess = await _health.hasPermissions(
+        [HealthDataType.STEPS],
+        permissions: [HealthDataAccess.READ],
+      );
+
+      // If we can check permissions, Health Connect is available
+      // (even if permissions are not granted yet)
+      return hasBasicAccess != null;
     } catch (e) {
+      // If any error occurs, assume Health Connect is not available
       return false;
     }
   }
-  
+
   @override
   Future<bool> hasPermissions(List<app_models.HealthDataType> types) async {
-    if (!isPlatformSupported) return false;
-    
+    if (!isPlatformSupported) {
+      throw const PlatformException(
+        'Health Connect is not supported on this platform',
+      );
+    }
+
     try {
       final healthTypes = types.map(_mapToHealthDataType).toList();
-      final permissions = healthTypes.map((type) => HealthDataAccess.READ).toList();
-      
-      return await _health.hasPermissions(healthTypes, permissions: permissions) ?? false;
+      final permissions = healthTypes
+          .map((type) => HealthDataAccess.READ)
+          .toList();
+
+      final result = await _health.hasPermissions(
+        healthTypes,
+        permissions: permissions,
+      );
+      return result ?? false;
     } catch (e) {
-      return false;
+      throw HealthConnectException(
+        'Failed to check permissions: ${e.toString()}',
+      );
     }
   }
-  
+
   @override
   Future<bool> requestPermissions(List<app_models.HealthDataType> types) async {
-    if (!isPlatformSupported) return false;
-    
+    if (!isPlatformSupported) {
+      throw const PlatformException(
+        'Health Connect is not supported on this platform',
+      );
+    }
+
     try {
       final healthTypes = types.map(_mapToHealthDataType).toList();
-      final permissions = healthTypes.map((type) => HealthDataAccess.READ).toList();
-      
-      final granted = await _health.requestAuthorization(healthTypes, permissions: permissions);
-      
+      final permissions = healthTypes
+          .map((type) => HealthDataAccess.READ)
+          .toList();
+
+      final granted = await _health.requestAuthorization(
+        healthTypes,
+        permissions: permissions,
+      );
+
       if (granted) {
-        // Emit permission changed event
+        // Check actual permissions granted and emit event
+        final actualPermissions = await _health.hasPermissions(
+          healthTypes,
+          permissions: permissions,
+        );
         final permissionMap = <app_models.HealthDataType, bool>{};
-        for (final type in types) {
-          permissionMap[type] = true;
+
+        for (int i = 0; i < types.length; i++) {
+          permissionMap[types[i]] = actualPermissions ?? false;
         }
+
         _eventController.add(PermissionChangedEvent(permissionMap));
       }
-      
+
       return granted;
     } catch (e) {
-      return false;
+      throw PermissionException(
+        'Failed to request permissions: ${e.toString()}',
+      );
     }
   }
-  
+
   @override
   Future<List<app_models.HealthDataPoint>> getHealthData(
     List<app_models.HealthDataType> types,
     DateTime startTime,
     DateTime endTime,
   ) async {
-    if (!isPlatformSupported) return [];
-    
+    if (!isPlatformSupported) {
+      throw const PlatformException(
+        'Health Connect is not supported on this platform',
+      );
+    }
+
     try {
       final healthTypes = types.map(_mapToHealthDataType).toList();
+
+      // Validate time range
+      if (endTime.isBefore(startTime)) {
+        throw const HealthConnectException(
+          'End time cannot be before start time',
+        );
+      }
+
       final healthData = await _health.getHealthDataFromTypes(
         startTime: startTime,
         endTime: endTime,
         types: healthTypes,
       );
-      
-      return healthData.map(_mapToAppHealthDataPoint).toList();
+
+      // Filter out invalid data points and map to app model
+      final validDataPoints = healthData
+          .where((point) => point.value is NumericHealthValue)
+          .map(_mapToAppHealthDataPoint)
+          .toList();
+
+      // Sort by timestamp (most recent first)
+      validDataPoints.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      return validDataPoints;
     } catch (e) {
-      return [];
+      if (e is HealthConnectException) rethrow;
+      throw HealthConnectException(
+        'Failed to fetch health data: ${e.toString()}',
+      );
     }
   }
-  
+
   @override
-  Future<bool> writeHealthData(List<app_models.HealthDataPoint> dataPoints) async {
+  Future<bool> writeHealthData(
+    List<app_models.HealthDataPoint> dataPoints,
+  ) async {
     // Write operations are not supported - this is a read-only implementation
     return false;
   }
-  
+
   @override
   Future<void> revokePermissions() async {
-    if (!isPlatformSupported) return;
-    
+    if (!isPlatformSupported) {
+      throw const PlatformException(
+        'Health Connect is not supported on this platform',
+      );
+    }
+
     try {
       await _health.revokePermissions();
       _eventController.add(PermissionChangedEvent({}));
     } catch (e) {
-      // Handle error silently
+      throw HealthConnectException(
+        'Failed to revoke permissions: ${e.toString()}',
+      );
     }
   }
-  
+
   @override
   Stream<HealthConnectEvent> get healthConnectEvents => _eventController.stream;
-  
+
   /// Map app health data type to health package type
   HealthDataType _mapToHealthDataType(app_models.HealthDataType type) {
     switch (type) {
@@ -195,9 +291,11 @@ class HealthConnectServiceImpl implements HealthConnectService {
         return HealthDataType.BLOOD_GLUCOSE;
     }
   }
-  
+
   /// Map health package data point to app data point
-  app_models.HealthDataPoint _mapToAppHealthDataPoint(HealthDataPoint healthPoint) {
+  app_models.HealthDataPoint _mapToAppHealthDataPoint(
+    HealthDataPoint healthPoint,
+  ) {
     final now = DateTime.now();
     return app_models.HealthDataPoint(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -217,9 +315,7 @@ class HealthConnectServiceImpl implements HealthConnectService {
       },
     );
   }
-  
 
-  
   /// Map health package type to app health data type
   app_models.HealthDataType _mapFromHealthDataType(HealthDataType type) {
     switch (type) {
@@ -250,7 +346,39 @@ class HealthConnectServiceImpl implements HealthConnectService {
         return app_models.HealthDataType.weight; // Default fallback
     }
   }
-  
+
+  @override
+  Future<Map<app_models.HealthDataType, bool>> getPermissionStatus(
+    List<app_models.HealthDataType> types,
+  ) async {
+    if (!isPlatformSupported) {
+      throw const PlatformException(
+        'Health Connect is not supported on this platform',
+      );
+    }
+
+    final result = <app_models.HealthDataType, bool>{};
+
+    try {
+      // Check permissions for each type individually
+      for (final type in types) {
+        final healthType = _mapToHealthDataType(type);
+        final hasPermission = await _health.hasPermissions(
+          [healthType],
+          permissions: [HealthDataAccess.READ],
+        );
+        result[type] = hasPermission ?? false;
+      }
+
+      return result;
+    } catch (e) {
+      throw HealthConnectException(
+        'Failed to get permission status: ${e.toString()}',
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _eventController.close();
   }
@@ -258,37 +386,52 @@ class HealthConnectServiceImpl implements HealthConnectService {
 
 /// Stub implementation for non-Android platforms
 class HealthConnectServiceStub implements HealthConnectService {
-  final StreamController<HealthConnectEvent> _eventController = 
+  final StreamController<HealthConnectEvent> _eventController =
       StreamController<HealthConnectEvent>.broadcast();
-  
+
   @override
   bool get isPlatformSupported => false;
-  
+
   @override
   Future<bool> isAvailable() async => false;
-  
+
   @override
-  Future<bool> hasPermissions(List<app_models.HealthDataType> types) async => false;
-  
+  Future<bool> hasPermissions(List<app_models.HealthDataType> types) async =>
+      false;
+
   @override
-  Future<bool> requestPermissions(List<app_models.HealthDataType> types) async => false;
-  
+  Future<bool> requestPermissions(
+    List<app_models.HealthDataType> types,
+  ) async => false;
+
   @override
   Future<List<app_models.HealthDataPoint>> getHealthData(
     List<app_models.HealthDataType> types,
     DateTime startTime,
     DateTime endTime,
   ) async => [];
-  
+
   @override
-  Future<bool> writeHealthData(List<app_models.HealthDataPoint> dataPoints) async => false;
-  
+  Future<bool> writeHealthData(
+    List<app_models.HealthDataPoint> dataPoints,
+  ) async => false;
+
   @override
   Future<void> revokePermissions() async {}
-  
+
   @override
   Stream<HealthConnectEvent> get healthConnectEvents => _eventController.stream;
-  
+
+  @override
+  Future<Map<app_models.HealthDataType, bool>> getPermissionStatus(
+    List<app_models.HealthDataType> types,
+  ) async {
+    throw const PlatformException(
+      'Health Connect is not supported on this platform',
+    );
+  }
+
+  @override
   void dispose() {
     _eventController.close();
   }
